@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -122,13 +124,91 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
     private Card fillCardTextElementData(Card tmpCard, Element cardTextElement) 
     {
         String name = cardTextElement.select("span>a").text();
+        Elements cardDetailElements = cardTextElement.select("p");
+        String cardStats = cardDetailElements.get(0).text();
+        String cardText = cardDetailElements.get(1).text();
+        String flavorText = cardDetailElements.get(2).text();
+        String artistText = cardDetailElements.get(3).text();
         tmpCard.setName(name);
-        System.out.println(name);
+        System.out.println("Name : " +name);
+        tmpCard = decypherCardStats(tmpCard, cardStats);
+        tmpCard.setCardText(cardText);
+        System.out.println("Card Text : " +cardText);
+        tmpCard.setFlavorText(flavorText);
+        System.out.println("Flavor Text : " +flavorText);
+        tmpCard.setArtistText(artistText);
+        System.out.println("Artist Text : " +artistText);
+        
         return tmpCard;
     }
 
     private Card fillPrintEditionsElement(Card tmpCard, Element printEditionsElement) 
     {
+        return tmpCard;
+    }
+
+    private Card decypherCardStats(Card tmpCard, String cardStats) 
+    {
+        System.out.println(cardStats);
+        String[] cardStatsArray = cardStats.split(",");
+        String cardTypeSectionStr = cardStatsArray[0];
+        
+        if(cardTypeSectionStr.contains("—"))
+        {
+            int creatureDelimIndex = cardTypeSectionStr.indexOf("—");
+            String tempRemaining = cardTypeSectionStr.substring(creatureDelimIndex);
+            if(tempRemaining.contains("("))
+            {
+                int end = cardTypeSectionStr.indexOf("(");
+                int loyaltyEnd = cardTypeSectionStr.indexOf(")");
+                int loyaltyStart = cardTypeSectionStr.indexOf(":");
+                String loyaltyStr = cardTypeSectionStr.substring(loyaltyStart+1,loyaltyEnd).trim();
+                tmpCard.setCardType(cardTypeSectionStr.substring(0,end));
+                System.out.println("Card Type : " +cardTypeSectionStr.substring(0,end));
+                tmpCard.setLoyalty(Integer.parseInt(loyaltyStr));
+                System.out.println("Loyalty: "+ loyaltyStr);
+            }
+            else if (tempRemaining.matches(".*\\d/\\d.*"))
+            {
+                
+                int i = 0;
+                while (!Character.isDigit(cardTypeSectionStr.charAt(i))) i++;
+                tmpCard.setCardType(cardTypeSectionStr.substring(0,i-1));
+                System.out.println("Card Type : " +cardTypeSectionStr.substring(0,i-1));
+                Matcher matcher = Pattern.compile("\\d+/\\d+").matcher(tempRemaining);
+                matcher.find();
+                String powerTough = matcher.group();
+                System.out.println("Power / Tough : "+powerTough);
+                String[] powerToughArray = powerTough.split("/");
+                tmpCard.setPower(Integer.parseInt(powerToughArray[0]));
+                System.out.println("Power : "+powerToughArray[0]);
+                tmpCard.setToughness(Integer.parseInt(powerToughArray[1]));
+                System.out.println("Tough : "+powerToughArray[1]);
+            }
+            else
+            {
+                tmpCard.setCardType(cardTypeSectionStr);
+                 System.out.println("Card Type : "+cardTypeSectionStr);
+            }
+            
+        }
+        else
+        {
+            tmpCard.setCardType("Card Type : "+cardTypeSectionStr);
+        }
+        
+        if(cardStatsArray.length > 1)
+        {
+            String manaSectionStr = cardStatsArray[1];
+            int startIndex = manaSectionStr.indexOf("(");
+            int endIndex = manaSectionStr.indexOf(")");
+            String convertedManaStr = manaSectionStr.substring(startIndex+1, endIndex);
+            tmpCard.setConvertedManaCost(Integer.parseInt(convertedManaStr));
+            System.out.println("Converted Mana Cost : " + Integer.parseInt(convertedManaStr));
+            tmpCard.setManaCost(manaSectionStr.substring(0,startIndex));
+            System.out.println("Mana Cost : " + manaSectionStr.substring(0,startIndex));
+        }
+        
         return tmpCard;
     }
     
