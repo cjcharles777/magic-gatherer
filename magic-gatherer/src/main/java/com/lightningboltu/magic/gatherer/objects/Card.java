@@ -4,6 +4,7 @@
  */
 package com.lightningboltu.magic.gatherer.objects;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,10 +20,11 @@ public class Card
     private Integer toughness;
     private Integer convertedManaCost;
     private Integer loyalty;
-    List<CardEdition> cardEditionList;
+    List<CardEdition> cardEditionList = new LinkedList<CardEdition>();
     private String cardText;
     private String flavorText;
     private String artistText;
+    private byte[] image;
     
     public String getName() 
     {
@@ -112,6 +114,14 @@ public class Card
 
     public void setArtistText(String artistText) {
         this.artistText = artistText;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
 

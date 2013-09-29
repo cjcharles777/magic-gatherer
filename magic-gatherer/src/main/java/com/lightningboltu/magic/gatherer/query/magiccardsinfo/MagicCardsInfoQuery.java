@@ -5,10 +5,11 @@
 package com.lightningboltu.magic.gatherer.query.magiccardsinfo;
 
 import com.lightningboltu.magic.gatherer.objects.Card;
+import com.lightningboltu.magic.gatherer.objects.CardEdition;
 import com.lightningboltu.magic.gatherer.objects.Edition;
 import com.lightningboltu.magic.gatherer.query.BaseCardSiteQuery;
+import com.lightningboltu.magic.gatherer.util.ImageUtil;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
             do
             {
                 Document d = getQueryResults(searchUrl);
-                result.addAll(retrieveCardsFromResultPage(d));
+                result.addAll(retrieveCardsFromResultPage(d, e));
                 Element nextPageElement = d.select("table").last().select("td").first();
                 String nextPage = nextPageElement.text();
                 next = nextPage.startsWith("next");
@@ -92,8 +93,12 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
     public List<Card> retriveCardsByName(String name) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
     private List<Card> retrieveCardsFromResultPage(Document d)
+    {
+        return retrieveCardsFromResultPage(d, null);
+    } 
+
+    private List<Card> retrieveCardsFromResultPage(Document d, Edition e)
     {
             List<Card> results =  new LinkedList<Card>();
             Elements cardElements = d.select("hr ~ table[align=center]");
@@ -107,7 +112,7 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                 
                 tmpCard = fillPicElementData(tmpCard, picElement);
                 tmpCard = fillCardTextElementData(tmpCard, cardTextElement);
-                tmpCard = fillPrintEditionsElement(tmpCard, printEditionsElement);
+                tmpCard = fillPrintEditionsElement(tmpCard, printEditionsElement, e);
                 results.add(tmpCard);
                 
                 
@@ -117,7 +122,19 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
     }
     private Card fillPicElementData(Card tmpCard, Element picElement) 
     {
-        
+        Element cardImgElement = picElement.select("img").first();
+        String imgUrl = cardImgElement.attr("abs:src");
+        System.out.println("Card Image Url : "+ imgUrl);
+        try 
+        {
+            byte[] cardImg = ImageUtil.convertInternetImageToByteArray(imgUrl);
+            tmpCard.setImage(cardImg);
+        }
+        catch (IOException ex) 
+        {
+            Logger.getLogger(MagicCardsInfoQuery.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Image issue");
+        }
         return tmpCard;
     }
 
@@ -142,8 +159,39 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         return tmpCard;
     }
 
-    private Card fillPrintEditionsElement(Card tmpCard, Element printEditionsElement) 
+    private Card fillPrintEditionsElement(Card tmpCard, Element printEditionsElement, Edition e) 
     {
+        Elements printEditionPartsElements = printEditionsElement.select("small > b");
+        
+        CardEdition tempCardEdition = new CardEdition();
+        String printNumSectionTxt = printEditionPartsElements.get(0).text();
+        System.out.println(printNumSectionTxt);
+        String editionRarityTxt = printEditionPartsElements.get(1).text();
+        System.out.println(editionRarityTxt);
+        
+        if(e != null)
+        {
+            tempCardEdition.setEdition(e);
+            System.out.println("Edition: " +e.getDisplay());
+        }
+        else
+        {
+            
+        }
+                
+        int printNumStart = printNumSectionTxt.indexOf("#");
+        int printNumEnd = printNumSectionTxt.indexOf("(");
+        int rarityStart = editionRarityTxt.indexOf("(");
+        int rarityEnd = editionRarityTxt.indexOf(")");
+        String printNumStr = printNumSectionTxt.substring(printNumStart+1, printNumEnd-1);
+        String rarityStr = editionRarityTxt.substring(rarityStart+1, rarityEnd);
+        
+        tempCardEdition.setEditionNumber(Integer.parseInt(printNumStr));
+        System.out.println("Edition # : " +Integer.parseInt(printNumStr));
+        tempCardEdition.setRarity(rarityStr);
+        System.out.println("Rarity : " + rarityStr );
+        
+        tmpCard.getCardEditionList().add(tempCardEdition);
         return tmpCard;
     }
 

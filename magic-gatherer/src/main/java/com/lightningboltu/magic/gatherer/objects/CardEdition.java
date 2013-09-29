@@ -8,10 +8,11 @@ package com.lightningboltu.magic.gatherer.objects;
  *
  * @author Cedric
  */
-class CardEdition 
+public class CardEdition 
 {
     private Edition edition;
     private String rarity;
+    private Integer editionNumber;
 
     public Edition getEdition() {
         return edition;
@@ -27,6 +28,14 @@ class CardEdition
 
     public void setRarity(String rarity) {
         this.rarity = rarity;
+    }
+
+    public Integer getEditionNumber() {
+        return editionNumber;
+    }
+
+    public void setEditionNumber(Integer editionNumber) {
+        this.editionNumber = editionNumber;
     }
     
     
