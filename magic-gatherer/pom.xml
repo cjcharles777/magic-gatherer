@@ -27,5 +27,11 @@
         <artifactId>jsoup</artifactId>
         <version>1.7.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-annotations</artifactId>
+      <version>3.3.1.GA</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
 </project>

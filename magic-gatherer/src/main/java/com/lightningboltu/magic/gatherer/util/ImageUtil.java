@@ -18,7 +18,6 @@ import javax.imageio.ImageIO;
  */
 public class ImageUtil 
 {
-    private static RenderedImage originalImage;
     public static byte[] convertInternetImageToByteArray (String url) throws IOException
     {
     
