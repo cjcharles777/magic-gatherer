@@ -13,17 +13,21 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author Cedric
  */
-public class CardDaoImpl implements CardDao 
+@Repository("CardDAO")
+@Transactional
+public class CardDaoImpl implements CardDao  
 {
-private HibernateTemplate hibernateTemplate;
+    private HibernateTemplate hibernateTemplate;
  
     @Autowired
+    @Override
     public void setSessionFactory(SessionFactory sessionFactory) {
         hibernateTemplate = new HibernateTemplate(sessionFactory);
     }

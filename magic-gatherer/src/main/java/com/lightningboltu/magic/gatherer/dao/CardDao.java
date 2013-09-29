@@ -6,6 +6,8 @@ package com.lightningboltu.magic.gatherer.dao;
 
 import com.lightningboltu.magic.gatherer.objects.Card;
 import java.util.List;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -34,5 +36,8 @@ public interface CardDao {
 
     @Transactional(readOnly = false)
     void saveCards(List<Card> cards);
+
+    @Autowired
+    void setSessionFactory(SessionFactory sessionFactory);
     
 }
