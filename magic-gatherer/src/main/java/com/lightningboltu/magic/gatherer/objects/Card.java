@@ -28,6 +28,7 @@ public class Card implements Serializable
     private Integer toughness;
     private Integer convertedManaCost;
     private Integer loyalty;
+    private String colorIndicator;
     List<CardEdition> cardEditionList = new LinkedList<CardEdition>();
     private String cardText;
     private String flavorText;
@@ -60,7 +61,7 @@ public class Card implements Serializable
         this.name = name;
     }
 
-    @Column(name = "cardType", length=100, nullable=false)
+    @Column(name = "card_type", length=100, nullable=false)
     public String getCardType() {
         return cardType;
     }
@@ -69,7 +70,7 @@ public class Card implements Serializable
         this.cardType = cardType;
     }
 
-    @Column(name = "manaCost", length=20)
+    @Column(name = "mana_cost", length=100)
     public String getManaCost() {
         return manaCost;
     }
@@ -96,7 +97,7 @@ public class Card implements Serializable
         this.toughness = toughness;
     }
 
-     @Column(name = "convertedManaCost")
+     @Column(name = "converted_mana_cost")
     public Integer getConvertedManaCost() {
         return convertedManaCost;
     }
@@ -129,7 +130,7 @@ public class Card implements Serializable
         this.cardEditionList = cardEditionList;
     }
 
-    @Column(name = "cardText", length=2000)
+    @Column(name = "card_text", length=2000)
     public String getCardText() {
         return cardText;
     }
@@ -138,7 +139,7 @@ public class Card implements Serializable
         this.cardText = cardText;
     }
 
-    @Column(name = "flavorText", length=2000)
+    @Column(name = "flavor_text", length=2000)
     public String getFlavorText() {
         return flavorText;
     }
@@ -147,7 +148,7 @@ public class Card implements Serializable
         this.flavorText = flavorText;
     }
 
-    @Column(name = "artistText", length=200)
+    @Column(name = "artist_text", length=200)
     public String getArtistText() {
         return artistText;
     }
@@ -168,6 +169,15 @@ public class Card implements Serializable
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+    
+    @Column(name = "color_indicator", length=200)
+    public String getColorIndicator() {
+        return colorIndicator;
+    }
+
+    public void setColorIndicator(String colorIndicator) {
+        this.colorIndicator = colorIndicator;
     }
 
 

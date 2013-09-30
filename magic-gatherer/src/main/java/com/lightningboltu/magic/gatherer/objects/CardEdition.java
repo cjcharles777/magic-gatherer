@@ -24,7 +24,7 @@ public class CardEdition implements Serializable
 {
     private Edition edition;
     private String rarity;
-    private Integer editionNumber;
+    private String editionNumber;
     private int id;
 
     
@@ -61,12 +61,12 @@ public class CardEdition implements Serializable
         this.rarity = rarity;
     }
 
-    @Column(name = "edition_number", nullable=false)
-    public Integer getEditionNumber() {
+    @Column(name = "edition_number", length=30, nullable=false)
+    public String getEditionNumber() {
         return editionNumber;
     }
 
-    public void setEditionNumber(Integer editionNumber) {
+    public void setEditionNumber(String editionNumber) {
         this.editionNumber = editionNumber;
     }
     

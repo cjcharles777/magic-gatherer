@@ -33,7 +33,7 @@
         <property name="dataSource">
             <ref bean="dataSource" />
         </property>
-        <property name="packagesToScan" value="cdiddy.objects" />
+        <property name="packagesToScan" value="com.lightningboltu.magic.gatherer.objects" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${jdbc.hibernate.dialect}</prop>
