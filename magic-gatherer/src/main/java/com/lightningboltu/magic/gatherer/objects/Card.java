@@ -22,7 +22,8 @@ public class Card implements Serializable
 {
     private int id;
     private String name;
-    private String cardType;
+    private List<CardType> cardType= new LinkedList<CardType>();
+    private List<CardSubType> cardSubType = new LinkedList<CardSubType>();
     private String manaCost;
     private Integer power;
     private Integer toughness;
@@ -32,8 +33,8 @@ public class Card implements Serializable
     List<CardEdition> cardEditionList = new LinkedList<CardEdition>();
     private String cardText;
     private String flavorText;
-    private String artistText;
-    private byte[] image;
+   
+   
 
     
     @Id
@@ -50,7 +51,7 @@ public class Card implements Serializable
         this.id = id;
     }
     
-    @Column(name = "name", length=100, nullable=false)
+    @Column(name = "name", length=250, nullable=false)
     public String getName() 
     {
         return name;
@@ -61,13 +62,33 @@ public class Card implements Serializable
         this.name = name;
     }
 
-    @Column(name = "card_type", length=100, nullable=false)
-    public String getCardType() {
+    @ManyToMany( cascade = {CascadeType.PERSIST, CascadeType.MERGE} )
+    @JoinTable(
+            name="CardToCardType",
+            joinColumns = @JoinColumn( name="card_id"),
+            inverseJoinColumns = @JoinColumn( name="card_type_id")
+    )
+     @LazyCollection(LazyCollectionOption.FALSE)
+    public List<CardType>  getCardType() {
         return cardType;
     }
 
-    public void setCardType(String cardType) {
+    public void setCardType(List<CardType> cardType) {
         this.cardType = cardType;
+    }
+    @ManyToMany( cascade = {CascadeType.PERSIST, CascadeType.MERGE} )
+    @JoinTable(
+            name="CardToCardSubType",
+            joinColumns = @JoinColumn( name="card_id"),
+            inverseJoinColumns = @JoinColumn( name="card_subtype_id")
+    )
+     @LazyCollection(LazyCollectionOption.FALSE)
+    public List<CardSubType>  getCardSubType() {
+        return cardSubType;
+    }
+
+    public void setCardSubType(List<CardSubType> cardSubType) {
+        this.cardSubType = cardSubType;
     }
 
     @Column(name = "mana_cost", length=100)
@@ -130,7 +151,7 @@ public class Card implements Serializable
         this.cardEditionList = cardEditionList;
     }
 
-    @Column(name = "card_text", length=2000)
+    @Column(name = "rules_text", length=2000)
     public String getCardText() {
         return cardText;
     }
@@ -148,28 +169,9 @@ public class Card implements Serializable
         this.flavorText = flavorText;
     }
 
-    @Column(name = "artist_text", length=200)
-    public String getArtistText() {
-        return artistText;
-    }
 
-    public void setArtistText(String artistText) {
-        this.artistText = artistText;
-    }
     
-    /**
-     *
-     * @return
-     */
-    @Column(name="image", columnDefinition="mediumblob")
-    @Lob   
-    public byte[] getImage() {
-        return image;
-    }
 
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
     
     @Column(name = "color_indicator", length=200)
     public String getColorIndicator() {

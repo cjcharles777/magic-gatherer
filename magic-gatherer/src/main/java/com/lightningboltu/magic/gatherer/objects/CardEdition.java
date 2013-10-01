@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
@@ -26,6 +27,8 @@ public class CardEdition implements Serializable
     private String rarity;
     private String editionNumber;
     private int id;
+    private byte[] image;
+    private String artistText;
 
     
      @Id
@@ -52,7 +55,7 @@ public class CardEdition implements Serializable
         this.edition = edition;
     }
 
-    @Column(name = "name", length=30, nullable=false)
+    @Column(name = "rarity", length=30, nullable=false)
     public String getRarity() {
         return rarity;
     }
@@ -70,6 +73,27 @@ public class CardEdition implements Serializable
         this.editionNumber = editionNumber;
     }
     
+        /**
+     *
+     * @return
+     */
+    @Column(name="image", columnDefinition="mediumblob")
+    @Lob   
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
     
+    @Column(name = "artist_text", length=200)
+    public String getArtistText() {
+        return artistText;
+    }
+
+    public void setArtistText(String artistText) {
+        this.artistText = artistText;
+    }
     
 }

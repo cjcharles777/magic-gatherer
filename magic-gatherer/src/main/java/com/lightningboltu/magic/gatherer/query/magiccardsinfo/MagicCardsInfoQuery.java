@@ -6,6 +6,8 @@ package com.lightningboltu.magic.gatherer.query.magiccardsinfo;
 
 import com.lightningboltu.magic.gatherer.objects.Card;
 import com.lightningboltu.magic.gatherer.objects.CardEdition;
+import com.lightningboltu.magic.gatherer.objects.CardSubType;
+import com.lightningboltu.magic.gatherer.objects.CardType;
 import com.lightningboltu.magic.gatherer.objects.Edition;
 import com.lightningboltu.magic.gatherer.query.BaseCardSiteQuery;
 import com.lightningboltu.magic.gatherer.util.ImageUtil;
@@ -110,9 +112,9 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                 Element cardTextElement = tdElements.get(1);
                 Element printEditionsElement = tdElements.get(2);
                 
-                tmpCard = fillPicElementData(tmpCard, picElement);
+                //
                 tmpCard = fillCardTextElementData(tmpCard, cardTextElement);
-                tmpCard = fillPrintEditionsElement(tmpCard, printEditionsElement, e);
+                tmpCard = fillPrintandPicEditionsElement(tmpCard, printEditionsElement, picElement, e);
                 results.add(tmpCard);
                 
                 
@@ -120,7 +122,7 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
             }
             return results;
     }
-    private Card fillPicElementData(Card tmpCard, Element picElement) 
+    private CardEdition fillPicElementData(CardEdition tmpCardEdition, Element picElement) 
     {
         Element cardImgElement = picElement.select("img").first();
         String imgUrl = cardImgElement.attr("abs:src");
@@ -128,14 +130,14 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         try 
         {
             byte[] cardImg = ImageUtil.convertInternetImageToByteArray(imgUrl);
-            tmpCard.setImage(cardImg);
+            tmpCardEdition.setImage(cardImg);
         }
         catch (IOException ex) 
         {
             Logger.getLogger(MagicCardsInfoQuery.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Image issue");
         }
-        return tmpCard;
+        return tmpCardEdition;
     }
 
     private Card fillCardTextElementData(Card tmpCard, Element cardTextElement) 
@@ -143,9 +145,9 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         String name = cardTextElement.select("span>a").text();
         Elements cardDetailElements = cardTextElement.select("p");
         String cardStats = cardDetailElements.get(0).text();
-        String cardText = cardDetailElements.get(1).text();
+        String cardText = cardDetailElements.get(1).html();
         String flavorText = cardDetailElements.get(2).text();
-        String artistText = cardDetailElements.get(3).text();
+        
         tmpCard.setName(name);
         System.out.println("Name : " +name);
         tmpCard = decypherCardStats(tmpCard, cardStats);
@@ -153,13 +155,13 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         System.out.println("Card Text : " +cardText);
         tmpCard.setFlavorText(flavorText);
         System.out.println("Flavor Text : " +flavorText);
-        tmpCard.setArtistText(artistText);
-        System.out.println("Artist Text : " +artistText);
+        
         
         return tmpCard;
     }
 
-    private Card fillPrintEditionsElement(Card tmpCard, Element printEditionsElement, Edition e) 
+    private Card fillPrintandPicEditionsElement(Card tmpCard, Element printEditionsElement, 
+            Element picElement, Edition e) 
     {
         Elements printEditionPartsElements = printEditionsElement.select("small > b");
         
@@ -181,15 +183,21 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                 
         int printNumStart = printNumSectionTxt.indexOf("#");
         int printNumEnd = printNumSectionTxt.indexOf("(");
+        int artistEnd = printNumSectionTxt.indexOf(")");
         int rarityStart = editionRarityTxt.indexOf("(");
         int rarityEnd = editionRarityTxt.indexOf(")");
         String printNumStr = printNumSectionTxt.substring(printNumStart+1, printNumEnd-1);
         String rarityStr = editionRarityTxt.substring(rarityStart+1, rarityEnd);
-        
+        String artistText =  printNumSectionTxt.substring(printNumEnd+1,artistEnd);
         tempCardEdition.setEditionNumber(printNumStr);
-        System.out.println("Edition # : " +Integer.parseInt(printNumStr));
+        System.out.println("Edition # : " +printNumStr);
         tempCardEdition.setRarity(rarityStr);
         System.out.println("Rarity : " + rarityStr );
+        tempCardEdition.setArtistText(artistText);
+        System.out.println("Artist Text : " +artistText);
+        
+        tempCardEdition = fillPicElementData(tempCardEdition, picElement);
+        
         
         tmpCard.getCardEditionList().add(tempCardEdition);
         return tmpCard;
@@ -200,6 +208,7 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         System.out.println(cardStats);
         String[] cardStatsArray = cardStats.split(",");
         String cardTypeSectionStr = cardStatsArray[0];
+        ExtractionResults extractResults;
         
         if(cardTypeSectionStr.contains("—"))
         {
@@ -214,7 +223,9 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                 if(specialType.equalsIgnoreCase("Loyalty"))
                 {
                     String loyaltyStr = cardTypeSectionStr.substring(loyaltyStart+1,loyaltyEnd).trim();
-                    tmpCard.setCardType(cardTypeSectionStr.substring(0,end));
+                    extractResults = extractCardTypes(cardTypeSectionStr.substring(0,end));
+                    tmpCard.setCardType(extractResults.getCardTypeList());
+                    tmpCard.setCardSubType(extractResults.getCardSubTypeList());
                     System.out.println("Card Type : " +cardTypeSectionStr.substring(0,end));
                     tmpCard.setLoyalty(Integer.parseInt(loyaltyStr));
                     System.out.println("Loyalty: "+ loyaltyStr);
@@ -223,18 +234,26 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                 {
                                     
                     int i = 0;
-                    while (!Character.isDigit(cardTypeSectionStr.charAt(i))) i++;
-                    tmpCard.setCardType(cardTypeSectionStr.substring(0,i-1));
+                    while ((!Character.isDigit(cardTypeSectionStr.charAt(i)) )&& i < cardTypeSectionStr.length()-1)
+                    {
+                        i++;
+                    }
+                    extractResults = extractCardTypes(cardTypeSectionStr.substring(0,i-1));
+                    
+                    tmpCard.setCardType(extractResults.getCardTypeList());
+                    tmpCard.setCardSubType(extractResults.getCardSubTypeList());
                     System.out.println("Card Type : " +cardTypeSectionStr.substring(0,i-1));
                     Matcher matcher = Pattern.compile("\\d+/\\d+").matcher(tempRemaining);
-                    matcher.find();
-                    String powerTough = matcher.group();
-                    System.out.println("Power / Tough : "+powerTough);
-                    String[] powerToughArray = powerTough.split("/");
-                    tmpCard.setPower(Integer.parseInt(powerToughArray[0]));
-                    System.out.println("Power : "+powerToughArray[0]);
-                    tmpCard.setToughness(Integer.parseInt(powerToughArray[1]));
-                    System.out.println("Tough : "+powerToughArray[1]);
+                    if(matcher.find())
+                    {
+                        String powerTough = matcher.group();
+                        System.out.println("Power / Tough : "+powerTough);
+                        String[] powerToughArray = powerTough.split("/");
+                        tmpCard.setPower(Integer.parseInt(powerToughArray[0]));
+                        System.out.println("Power : "+powerToughArray[0]);
+                        tmpCard.setToughness(Integer.parseInt(powerToughArray[1]));
+                        System.out.println("Tough : "+powerToughArray[1]);
+                    }
                     
                      String colorIndicatorStr = cardTypeSectionStr.substring(loyaltyStart+1,loyaltyEnd).trim();
                       tmpCard.setColorIndicator(colorIndicatorStr);
@@ -245,29 +264,42 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
             {
                 
                 int i = 0;
-                while (!Character.isDigit(cardTypeSectionStr.charAt(i))) i++;
-                tmpCard.setCardType(cardTypeSectionStr.substring(0,i-1));
+                while (!Character.isDigit(cardTypeSectionStr.charAt(i)))
+                {
+                    i++;
+                }
+               
+                extractResults = extractCardTypes(cardTypeSectionStr.substring(0,i-1));
+                tmpCard.setCardType(extractResults.getCardTypeList());
+                tmpCard.setCardSubType(extractResults.getCardSubTypeList());
                 System.out.println("Card Type : " +cardTypeSectionStr.substring(0,i-1));
                 Matcher matcher = Pattern.compile("\\d+/\\d+").matcher(tempRemaining);
-                matcher.find();
-                String powerTough = matcher.group();
-                System.out.println("Power / Tough : "+powerTough);
-                String[] powerToughArray = powerTough.split("/");
-                tmpCard.setPower(Integer.parseInt(powerToughArray[0]));
-                System.out.println("Power : "+powerToughArray[0]);
-                tmpCard.setToughness(Integer.parseInt(powerToughArray[1]));
-                System.out.println("Tough : "+powerToughArray[1]);
+                if(matcher.find())
+                {
+                    String powerTough = matcher.group();
+                    System.out.println("Power / Tough : "+powerTough);
+                    String[] powerToughArray = powerTough.split("/");
+                    tmpCard.setPower(Integer.parseInt(powerToughArray[0]));
+                    System.out.println("Power : "+powerToughArray[0]);
+                    tmpCard.setToughness(Integer.parseInt(powerToughArray[1]));
+                    System.out.println("Tough : "+powerToughArray[1]);
+                }
             }
             else
             {
-                tmpCard.setCardType(cardTypeSectionStr);
+                 extractResults = extractCardTypes(cardTypeSectionStr);
+                tmpCard.setCardType(extractResults.getCardTypeList());
+                tmpCard.setCardSubType(extractResults.getCardSubTypeList());
                  System.out.println("Card Type : "+cardTypeSectionStr);
             }
             
         }
         else
         {
-            tmpCard.setCardType("Card Type : "+cardTypeSectionStr);
+            extractResults = extractCardTypes(cardTypeSectionStr);
+            tmpCard.setCardType(extractResults.getCardTypeList());
+            tmpCard.setCardSubType(extractResults.getCardSubTypeList());
+            System.out.println("Card Type : "+cardTypeSectionStr);
         }
         
         if(cardStatsArray.length > 1)
@@ -275,13 +307,28 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
             String manaSectionStr = cardStatsArray[1];
             if(manaSectionStr.contains("("))
             {
-                int startIndex = manaSectionStr.indexOf("(");
-                int endIndex = manaSectionStr.indexOf(")");
-                String convertedManaStr = manaSectionStr.substring(startIndex+1, endIndex);
-                tmpCard.setConvertedManaCost(Integer.parseInt(convertedManaStr));
-                System.out.println("Converted Mana Cost : " + Integer.parseInt(convertedManaStr));
-                tmpCard.setManaCost(manaSectionStr.substring(0,startIndex));
-                System.out.println("Mana Cost : " + manaSectionStr.substring(0,startIndex));
+                if(!manaSectionStr.contains("Color Indicator:"))
+                {
+                    int startIndex = manaSectionStr.indexOf("(");
+                    int endIndex = manaSectionStr.indexOf(")");
+                    String convertedManaStr = manaSectionStr.substring(startIndex+1, endIndex);
+                    tmpCard.setConvertedManaCost(Integer.parseInt(convertedManaStr));
+                    System.out.println("Converted Mana Cost : " + Integer.parseInt(convertedManaStr));
+                    tmpCard.setManaCost(manaSectionStr.substring(0,startIndex));
+                    System.out.println("Mana Cost : " + manaSectionStr.substring(0,startIndex));
+                }
+                else
+                {
+               
+                    int indicatorStart = manaSectionStr.indexOf(":"); //Intervention Pact;
+                    int indicatorEnd = manaSectionStr.indexOf(")"); //Intervention Pact;
+                    String colorIndicatorStr = manaSectionStr.substring(indicatorStart+1,indicatorEnd).trim();
+                    tmpCard.setColorIndicator(colorIndicatorStr);
+                    System.out.println("Color Indicator: "+ colorIndicatorStr);
+                    tmpCard.setConvertedManaCost(0);
+                    System.out.println("Converted Mana Cost : " + 0);
+                    
+                }
             }
             else
             {
@@ -295,6 +342,68 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         return tmpCard;
     }
     
-    
+    private ExtractionResults extractCardTypes(String s)
+    {
+        ExtractionResults result = new ExtractionResults();
+        String cardTypeString = s;
+        if(s.contains("—"))
+        {
+            String[] cardStatsArray = s.split("—");
+            cardTypeString = cardStatsArray[0];
+           
+            if(cardStatsArray.length == 2)
+            {
+                String[] cardSubTypeArray = cardStatsArray[1].split(" ");
+                for (String cs : cardSubTypeArray)
+                {
+                    CardSubType tempCardSubType = new CardSubType();
+                    tempCardSubType.setName(cs);
+                    result.getCardSubTypeList().add(tempCardSubType);
+                }
+            }
+        }
+        
+         String[] cardTypeArray = cardTypeString.split(" ");
+         for (String ct : cardTypeArray)
+        {
+            CardType tempCardType = new CardType();
+            tempCardType.setName(ct);
+            result.getCardTypeList().add(tempCardType);
+        }
+        
+        
+        
+        
+        return result;
+    }
+
+    private static class ExtractionResults 
+    {
+            List<CardType> cardTypeList =  new LinkedList<CardType>();
+            List<CardSubType> cardSubTypeList  =  new LinkedList<CardSubType>();
+            
+        public ExtractionResults() 
+        {
+            
+            
+        }
+
+        public List<CardType> getCardTypeList() {
+            return cardTypeList;
+        }
+
+        public void setCardTypeList(List<CardType> cardTypeList) {
+            this.cardTypeList = cardTypeList;
+        }
+
+        public List<CardSubType> getCardSubTypeList() {
+            return cardSubTypeList;
+        }
+
+        public void setCardSubTypeList(List<CardSubType> cardSubTypeList) {
+            this.cardSubTypeList = cardSubTypeList;
+        }
+        
+    }
     
 }
