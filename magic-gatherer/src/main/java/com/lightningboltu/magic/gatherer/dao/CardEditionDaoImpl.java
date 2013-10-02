@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Cedric
  */
 @Repository("CardEditionDAO")
+@Transactional
 public class CardEditionDaoImpl implements CardEditionDao 
 {
      private HibernateTemplate hibernateTemplate;

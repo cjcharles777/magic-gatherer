@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author cedric
  */
 @Repository("CardSubTypeDAO")
+@Transactional
 public class CardSubTypeDaoImpl implements CardSubTypeDao 
 {
        private HibernateTemplate hibernateTemplate;

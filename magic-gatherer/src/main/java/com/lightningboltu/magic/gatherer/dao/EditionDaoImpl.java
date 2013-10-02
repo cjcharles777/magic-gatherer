@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Cedric
  */
 @Repository("EditionDAO")
+@Transactional
 public class EditionDaoImpl implements EditionDao 
 {
  private HibernateTemplate hibernateTemplate;
