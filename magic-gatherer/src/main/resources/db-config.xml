@@ -27,6 +27,13 @@
         <property name="password">
             <value>${jdbc.password}</value>
         </property>
+        <property name="acquire_increment">1</property>
+        <property name="idle_test_period">100</property>
+        <property name="max_size">10</property>
+        <property name="max_statements">10</property>
+        <property name="min_size">10</property>
+        <property name="timeout">100</property>
+        <property name="testConnectionOnCheckin">true</property>
     </bean>
     <bean id="sessionFactory"
         class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
@@ -38,7 +45,14 @@
             <props>
                 <prop key="hibernate.dialect">${jdbc.hibernate.dialect}</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="c3p0.acquire_increment">1</prop>
+                <prop key="c3p0.idle_test_period">100</prop>
+                <prop key="c3p0.max_size">10</prop>
+                <prop key="c3p0.max_statements">10</prop>
+                <prop key="c3p0.min_size">10</prop>
+                <prop key="c3p0.timeout">100</prop>
+                <prop key="c3p0.testConnectionOnCheckin">true</prop>
             </props>
         </property>
     </bean>
