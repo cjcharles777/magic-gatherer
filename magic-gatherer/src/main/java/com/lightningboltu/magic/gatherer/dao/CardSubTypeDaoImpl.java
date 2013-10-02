@@ -5,7 +5,10 @@
 package com.lightningboltu.magic.gatherer.dao;
 
 import com.lightningboltu.magic.gatherer.objects.CardSubType;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
@@ -40,7 +43,20 @@ public class CardSubTypeDaoImpl implements CardSubTypeDao
     @Override
     public void saveCardSubTypes(List<CardSubType> cardSubTypes) 
     {
-        hibernateTemplate.saveOrUpdateAll(cardSubTypes);
+        List<CardSubType> tempSaveList = new LinkedList<CardSubType>();
+        for(CardSubType temp : cardSubTypes )
+        {
+            tempSaveList.add(temp);
+            if(tempSaveList.size() % 1000 == 1)
+            {
+                hibernateTemplate.saveOrUpdateAll(tempSaveList);
+                hibernateTemplate.flush();
+                hibernateTemplate.clear();
+                tempSaveList.clear();
+                Logger.getLogger(CardSubTypeDaoImpl.class.getName()).log(Level.INFO,"Card subtype batch save!");
+            }
+        }
+        hibernateTemplate.saveOrUpdateAll(tempSaveList);
     }
 
     

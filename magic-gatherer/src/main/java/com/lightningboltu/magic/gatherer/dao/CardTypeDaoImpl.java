@@ -5,7 +5,11 @@
 package com.lightningboltu.magic.gatherer.dao;
 
 import com.lightningboltu.magic.gatherer.objects.CardType;
+import com.lightningboltu.magic.gatherer.query.magiccardsinfo.MagicCardsInfoQuery;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
@@ -40,7 +44,20 @@ public class CardTypeDaoImpl implements CardTypeDao
     @Override
     public void saveCardTypes(List<CardType> cardTypes) 
     {
-        hibernateTemplate.saveOrUpdateAll(cardTypes);
+        List<CardType> tempSaveList = new LinkedList<CardType>();
+        for(CardType temp : cardTypes )
+        {
+            tempSaveList.add(temp);
+            if(tempSaveList.size() % 1000 == 1)
+            {
+                hibernateTemplate.saveOrUpdateAll(tempSaveList);
+                hibernateTemplate.flush();
+                hibernateTemplate.clear();
+                tempSaveList.clear();
+                Logger.getLogger(CardTypeDaoImpl.class.getName()).log(Level.INFO,"Card type batch save!");
+            }
+        }
+        hibernateTemplate.saveOrUpdateAll(tempSaveList);
     }
 
     

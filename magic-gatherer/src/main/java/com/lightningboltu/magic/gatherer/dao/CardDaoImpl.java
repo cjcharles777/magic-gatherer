@@ -5,12 +5,15 @@
 package com.lightningboltu.magic.gatherer.dao;
 
 import com.lightningboltu.magic.gatherer.objects.Card;
+import com.lightningboltu.magic.gatherer.objects.CardEdition;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
@@ -42,7 +45,20 @@ public class CardDaoImpl implements CardDao
     @Override
     public void saveCards(List<Card> cards) 
     {
-        hibernateTemplate.saveOrUpdateAll(cards);
+        List<Card> tempSaveList = new LinkedList<Card>();
+        for(Card temp : cards )
+        {
+            tempSaveList.add(temp);
+            if(tempSaveList.size() % 1000 == 1)
+            {
+                hibernateTemplate.saveOrUpdateAll(tempSaveList);
+                hibernateTemplate.flush();
+                hibernateTemplate.clear();
+                tempSaveList.clear();
+                Logger.getLogger(CardDaoImpl.class.getName()).log(Level.INFO,"Card batch save!");
+            }
+        }
+        hibernateTemplate.saveOrUpdateAll(tempSaveList);
     }
 
     
