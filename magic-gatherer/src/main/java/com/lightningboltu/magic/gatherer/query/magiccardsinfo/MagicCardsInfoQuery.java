@@ -296,6 +296,20 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
         }
         else
         {
+            String extractInput = cardTypeSectionStr;
+            if(cardTypeSectionStr.contains("(Color Indicator:"))
+            {
+                int start = cardTypeSectionStr.indexOf("(Color");
+                int colon = cardTypeSectionStr.indexOf(":");
+                int end = cardTypeSectionStr.indexOf(")");
+                
+                String colorIndicatorStr = cardTypeSectionStr.substring(colon+1,end).trim();
+                tmpCard.setColorIndicator(colorIndicatorStr);
+                System.out.println("Color Indicator: "+ colorIndicatorStr);
+               extractInput = cardTypeSectionStr.substring(0, start) + 
+                       cardTypeSectionStr.substring(end+1);
+                   
+            }
             extractResults = extractCardTypes(cardTypeSectionStr);
             tmpCard.setCardType(extractResults.getCardTypeList());
             tmpCard.setCardSubType(extractResults.getCardSubTypeList());
