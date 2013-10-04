@@ -310,7 +310,7 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                        cardTypeSectionStr.substring(end+1);
                    
             }
-            extractResults = extractCardTypes(cardTypeSectionStr);
+            extractResults = extractCardTypes(extractInput);
             tmpCard.setCardType(extractResults.getCardTypeList());
             tmpCard.setCardSubType(extractResults.getCardSubTypeList());
             System.out.println("Card Type : "+cardTypeSectionStr);
@@ -334,13 +334,36 @@ public class MagicCardsInfoQuery extends BaseCardSiteQuery
                 else
                 {
                
-                    int indicatorStart = manaSectionStr.indexOf(":"); //Intervention Pact;
+                    int indicatorStart = manaSectionStr.indexOf("("); //Intervention Pact;
+                    int indicatorColStart = manaSectionStr.indexOf(":"); //Intervention Pact;
                     int indicatorEnd = manaSectionStr.indexOf(")"); //Intervention Pact;
-                    String colorIndicatorStr = manaSectionStr.substring(indicatorStart+1,indicatorEnd).trim();
-                    tmpCard.setColorIndicator(colorIndicatorStr);
-                    System.out.println("Color Indicator: "+ colorIndicatorStr);
-                    tmpCard.setConvertedManaCost(0);
-                    System.out.println("Converted Mana Cost : " + 0);
+                    String manaSubString = manaSectionStr.substring(indicatorStart+1,indicatorEnd).trim();
+                    if(manaSubString.contains("Color Indicator:"))
+                    {
+                        String colorIndicatorStr = manaSectionStr.substring(indicatorColStart+1,indicatorEnd).trim();
+                        tmpCard.setColorIndicator(colorIndicatorStr);
+                        System.out.println("Color Indicator: "+ colorIndicatorStr);
+                        tmpCard.setConvertedManaCost(0);
+                        System.out.println("Converted Mana Cost : " + 0);
+                    }
+                    else
+                    {
+
+                        String convertedManaStr = manaSubString;
+                        tmpCard.setConvertedManaCost(Integer.parseInt(convertedManaStr));
+                        System.out.println("Converted Mana Cost : " + Integer.parseInt(convertedManaStr));
+                        tmpCard.setManaCost(manaSectionStr.substring(0,indicatorStart));
+                        System.out.println("Mana Cost : " + manaSectionStr.substring(0,indicatorStart));
+                        String colorSubStringPart = manaSectionStr.substring(indicatorEnd+1);
+                        indicatorColStart = colorSubStringPart.indexOf(":"); //Intervention Pact;
+                        indicatorEnd = colorSubStringPart.indexOf(")"); //Intervention Pact;
+                        String colorIndicatorStr = colorSubStringPart.substring(indicatorColStart+1,indicatorEnd).trim();
+                        tmpCard.setColorIndicator(colorIndicatorStr);
+                        System.out.println("Color Indicator: "+ colorIndicatorStr);
+                        
+                    }
+
+
                     
                 }
             }
