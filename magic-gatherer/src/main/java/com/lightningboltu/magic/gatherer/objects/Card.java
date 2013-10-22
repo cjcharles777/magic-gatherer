@@ -7,16 +7,20 @@ package com.lightningboltu.magic.gatherer.objects;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import javax.persistence.*;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import javax.persistence.*;
 
 /**
  *
  * @author cedric
  */
 @Entity
+@Cache(region="Cards", usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @Table(name = "Cards")
 public class Card implements Serializable
 {
@@ -68,7 +72,8 @@ public class Card implements Serializable
             joinColumns = @JoinColumn( name="card_id"),
             inverseJoinColumns = @JoinColumn( name="card_type_id")
     )
-     @LazyCollection(LazyCollectionOption.FALSE)
+    @BatchSize(size = 20) 
+    @LazyCollection(LazyCollectionOption.FALSE)
     public List<CardType>  getCardType() {
         return cardType;
     }
@@ -82,7 +87,8 @@ public class Card implements Serializable
             joinColumns = @JoinColumn( name="card_id"),
             inverseJoinColumns = @JoinColumn( name="card_subtype_id")
     )
-     @LazyCollection(LazyCollectionOption.FALSE)
+    @BatchSize(size = 20) 
+    @LazyCollection(LazyCollectionOption.FALSE)
     public List<CardSubType>  getCardSubType() {
         return cardSubType;
     }
@@ -142,7 +148,8 @@ public class Card implements Serializable
             joinColumns = @JoinColumn( name="card_id"),
             inverseJoinColumns = @JoinColumn( name="edition_id")
     )
-     @LazyCollection(LazyCollectionOption.FALSE)
+    @BatchSize(size = 20) 
+    @LazyCollection(LazyCollectionOption.FALSE)
     public List<CardEdition> getCardEditionList() {
         return cardEditionList;
     }

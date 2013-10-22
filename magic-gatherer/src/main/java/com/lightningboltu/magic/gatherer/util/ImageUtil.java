@@ -4,11 +4,14 @@
  */
 package com.lightningboltu.magic.gatherer.util;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import javax.imageio.ImageIO;
 
@@ -28,4 +31,13 @@ public class ImageUtil
         baos.flush();
         return baos.toByteArray();
     }
+    public static Image convertByteArrayToInternetImage (byte[] imageInByte) throws IOException
+    {   
+        InputStream in = new ByteArrayInputStream(imageInByte);
+        BufferedImage bImageFromConvert = ImageIO.read(in);
+        return bImageFromConvert;
+            
+    }
+ 
+			
 }

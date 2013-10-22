@@ -13,13 +13,19 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 /**
  *
  * @author Cedric
  */
 @Entity
+@Cache(region="CardEdition", usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @Table(name = "CardEdition")
 public class CardEdition implements Serializable
 {
@@ -29,6 +35,7 @@ public class CardEdition implements Serializable
     private int id;
     private byte[] image;
     private String artistText;
+    
 
     
      @Id
@@ -47,6 +54,8 @@ public class CardEdition implements Serializable
     
     
     @ManyToOne(cascade = CascadeType.ALL)
+    @BatchSize(size = 20) 
+    @LazyCollection(LazyCollectionOption.FALSE)
     public Edition getEdition() {
         return edition;
     }
@@ -77,15 +86,19 @@ public class CardEdition implements Serializable
      *
      * @return
      */
+
     @Column(name="image", columnDefinition="mediumblob")
     @Lob   
-    public byte[] getImage() {
+    public byte[] getImage() 
+    {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(byte[] image) 
+    {
         this.image = image;
     }
+    
     
     @Column(name = "artist_text", length=200)
     public String getArtistText() {
@@ -95,5 +108,8 @@ public class CardEdition implements Serializable
     public void setArtistText(String artistText) {
         this.artistText = artistText;
     }
+
+
+    
     
 }
