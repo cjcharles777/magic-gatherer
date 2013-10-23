@@ -4,6 +4,8 @@
  */
 package com.lightningboltu.magic.gatherer.ui;
 
+import org.springframework.context.ApplicationContext;
+
 /**
  *
  * @author cedric
@@ -13,8 +15,9 @@ public class CardsJPanel extends DefaultJPanel {
     /**
      * Creates new form CardsJPanel
      */
-    public CardsJPanel() {
-        initComponents();
+    public CardsJPanel(ApplicationContext applicationContext) 
+    {
+        super(applicationContext);
     }
 
     /**
